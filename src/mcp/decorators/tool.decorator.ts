@@ -6,8 +6,8 @@ import { ToolAnnotations as SdkToolAnnotations } from '@modelcontextprotocol/sdk
 export interface ToolMetadata {
   name: string;
   description: string;
-  parameters?: z.ZodTypeAny;
-  outputSchema?: z.ZodTypeAny;
+  parameters?: z.ZodType<any>;
+  outputSchema?: z.ZodType<any>;
   annotations?: SdkToolAnnotations;
   _meta?: Record<string, any>;
 }
@@ -18,8 +18,8 @@ export interface ToolAnnotations extends SdkToolAnnotations {}
 export interface ToolOptions {
   name?: string;
   description?: string;
-  parameters?: z.ZodTypeAny;
-  outputSchema?: z.ZodTypeAny;
+  parameters?: z.ZodType<any>;
+  outputSchema?: z.ZodType<any>;
   annotations?: ToolAnnotations;
   _meta?: Record<string, any>;
 }
@@ -29,8 +29,8 @@ export interface ToolOptions {
  * @param {Object} options - The options for the decorator
  * @param {string} options.name - The name of the tool
  * @param {string} options.description - The description of the tool
- * @param {z.ZodTypeAny} [options.parameters] - The parameters of the tool
- * @param {z.ZodTypeAny} [options.outputSchema] - The output schema of the tool
+ * @param {z.ZodType} [options.parameters] - The parameters of the tool
+ * @param {z.ZodType} [options.outputSchema] - The output schema of the tool
  * @returns {MethodDecorator} - The decorator
  */
 export const Tool = (options: ToolOptions) => {

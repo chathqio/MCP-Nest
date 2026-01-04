@@ -7,10 +7,10 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { ContextIdFactory, ModuleRef } from '@nestjs/core';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { z } from 'zod';
+import { zodToJsonSchema } from '../../utils/zod-schema-converter';
 import { McpRegistryService } from '../mcp-registry.service';
 import { McpHandlerBase } from './mcp-handler.base';
-import { ZodTypeAny } from 'zod';
 import { HttpRequest } from '../../interfaces/http-adapter.interface';
 import { McpRequestWithUser } from 'src/authz';
 
@@ -33,7 +33,7 @@ export class McpToolsHandler extends McpHandlerBase {
     ];
   }
 
-  private formatToolResult(result: any, outputSchema?: ZodTypeAny): any {
+  private formatToolResult(result: any, outputSchema?: z.ZodType<any>): any {
     if (result && typeof result === 'object' && Array.isArray(result.content)) {
       return result;
     }
