@@ -79,10 +79,14 @@ export class JwtTokenService {
     // Always include scope to ensure parity with refresh token claims
     accessTokenPayload.scope = scope || '';
 
-    const accessToken = jwt.sign(accessTokenPayload, this.jwtSecret, {
-      algorithm: 'HS256',
-      expiresIn: this.accessTokenExpiresIn,
-    });
+    const accessToken = jwt.sign(
+      accessTokenPayload,
+      this.jwtSecret,
+      {
+        algorithm: 'HS256',
+        expiresIn: this.accessTokenExpiresIn,
+      } as any,
+    );
 
     let refreshToken: string | undefined = undefined;
     if (this.enableRefreshTokens) {
@@ -99,10 +103,14 @@ export class JwtTokenService {
       if (extras?.user_profile_id) {
         refreshTokenPayload.user_profile_id = extras.user_profile_id;
       }
-      refreshToken = jwt.sign(refreshTokenPayload, this.jwtSecret, {
-        algorithm: 'HS256',
-        expiresIn: this.refreshTokenExpiresIn,
-      });
+      refreshToken = jwt.sign(
+        refreshTokenPayload,
+        this.jwtSecret,
+        {
+          algorithm: 'HS256',
+          expiresIn: this.refreshTokenExpiresIn,
+        } as any,
+      );
     }
 
     return {
@@ -159,10 +167,14 @@ export class JwtTokenService {
       aud: 'mcp-client',
     };
 
-    return jwt.sign(payload, this.jwtSecret, {
-      algorithm: 'HS256',
-      expiresIn: '24h',
-    });
+    return jwt.sign(
+      payload,
+      this.jwtSecret,
+      {
+        algorithm: 'HS256',
+        expiresIn: '24h',
+      } as any,
+    );
   }
 
   private parseDurationToSeconds(duration: string): number {

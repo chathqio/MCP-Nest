@@ -19,7 +19,9 @@ export type McpRequestSchema =
   | typeof ReadResourceRequestSchema
   | typeof GetPromptRequestSchema;
 
-export type McpRequest = z.infer<McpRequestSchema>;
+// Using 'any' to avoid strict type constraints from union of Zod schemas
+// The actual request will be one of the three types based on the method
+export type McpRequest = any;
 
 /**
  * Enhanced execution context that includes user information

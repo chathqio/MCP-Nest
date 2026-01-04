@@ -20,7 +20,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json --sourceMap --inlineSources",
-    "prepare": "npm run build",
+    "prepare": "pnpm run build",
     "start:playground": "ts-node-dev --respawn playground/servers/server-stateful.ts",
     "start:fastify": "ts-node-dev --respawn playground/servers/server-fastify.ts",
     "test": "npx --node-options=--experimental-vm-modules jest",
@@ -67,6 +67,7 @@
     "@types/cookie-parser": "^1.4.9",
     "@types/express": "^5.0.2",
     "@types/jest": "^29.5.14",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.10.10",
     "@types/passport-github": "^1.1.12",
     "@types/passport-google-oauth20": "^2.0.16",
@@ -86,6 +87,7 @@
   "dependencies": {
     "@nestjs/config": "^4.0.2",
     "cookie-parser": "^1.4.7",
+    "jsonwebtoken": "^9.0.0",
     "multer": "^2.0.2",
     "passport": "^0.7.0",
     "passport-azure-ad-oauth2": "^0.0.4",
