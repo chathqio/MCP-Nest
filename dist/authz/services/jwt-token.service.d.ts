@@ -8,6 +8,9 @@ export interface JwtPayload {
     type: 'access' | 'refresh' | 'user';
     user_data?: any;
     user_profile_id?: string;
+    iss?: string;
+    aud?: string | string[];
+    jti?: string;
     iat?: number;
     exp?: number;
 }
@@ -19,11 +22,11 @@ export interface TokenPair {
     scope?: string;
 }
 export declare class JwtTokenService {
-    private jwtSecret;
-    private issuer;
-    private accessTokenExpiresIn;
-    private refreshTokenExpiresIn;
-    private enableRefreshTokens;
+    private readonly jwtSecret;
+    private readonly issuer;
+    private readonly accessTokenExpiresInSeconds;
+    private readonly refreshTokenExpiresInSeconds;
+    private readonly enableRefreshTokens;
     constructor(options: OAuthModuleOptions);
     generateTokenPair(userId: string, clientId: string, scope?: string, resource?: string, extras?: {
         user_profile_id?: string;

@@ -6,7 +6,7 @@ function zodToJsonSchema(schema) {
         return schema.toJSONSchema();
     }
     try {
-        const { zodToJsonSchema: legacyZodToJsonSchema } = require('zod-to-json-schema');
+        const { zodToJsonSchema: legacyZodToJsonSchema, } = require('zod-to-json-schema');
         return legacyZodToJsonSchema(schema);
     }
     catch (error) {

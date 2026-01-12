@@ -58,8 +58,8 @@ let JwtTokenService = class JwtTokenService {
         this.jwtSecret = jwtSecret;
         this.issuer =
             options.jwtIssuer || options.serverUrl || 'https://localhost:3000';
-        this.accessTokenExpiresIn = options.jwtAccessTokenExpiresIn;
-        this.refreshTokenExpiresIn = options.jwtRefreshTokenExpiresIn;
+        this.accessTokenExpiresInSeconds = this.parseDurationToSeconds(options.jwtAccessTokenExpiresIn);
+        this.refreshTokenExpiresInSeconds = this.parseDurationToSeconds(options.jwtRefreshTokenExpiresIn);
         this.enableRefreshTokens = options.enableRefreshTokens;
     }
     generateTokenPair(userId, clientId, scope = '', resource, extras) {
@@ -82,9 +82,10 @@ let JwtTokenService = class JwtTokenService {
             accessTokenPayload.user_data = extras.user_data;
         }
         accessTokenPayload.scope = scope || '';
+        const algorithm = 'HS256';
         const accessToken = jwt.sign(accessTokenPayload, this.jwtSecret, {
-            algorithm: 'HS256',
-            expiresIn: this.accessTokenExpiresIn,
+            algorithm,
+            expiresIn: this.accessTokenExpiresInSeconds,
         });
         let refreshToken = undefined;
         if (this.enableRefreshTokens) {
@@ -102,14 +103,14 @@ let JwtTokenService = class JwtTokenService {
                 refreshTokenPayload.user_profile_id = extras.user_profile_id;
             }
             refreshToken = jwt.sign(refreshTokenPayload, this.jwtSecret, {
-                algorithm: 'HS256',
-                expiresIn: this.refreshTokenExpiresIn,
+                algorithm,
+                expiresIn: this.refreshTokenExpiresInSeconds,
             });
         }
         return {
             access_token: accessToken,
             token_type: 'bearer',
-            expires_in: this.parseDurationToSeconds(this.accessTokenExpiresIn),
+            expires_in: this.accessTokenExpiresInSeconds,
             ...(refreshToken ? { refresh_token: refreshToken } : {}),
         };
     }
@@ -147,9 +148,10 @@ let JwtTokenService = class JwtTokenService {
             iss: serverUrl,
             aud: 'mcp-client',
         };
+        const algorithm = 'HS256';
         return jwt.sign(payload, this.jwtSecret, {
-            algorithm: 'HS256',
-            expiresIn: '24h',
+            algorithm,
+            expiresIn: 24 * 60 * 60,
         });
     }
     parseDurationToSeconds(duration) {

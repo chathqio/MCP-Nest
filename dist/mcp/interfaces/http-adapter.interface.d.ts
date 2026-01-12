@@ -4,7 +4,7 @@ export interface HttpRequest {
     headers: Record<string, string | string[] | undefined>;
     query: Record<string, any>;
     body?: any;
-    params?: Record<string, string>;
+    params?: Record<string, string | string[] | undefined>;
     get?(name: string): string | undefined;
     raw?: any;
 }

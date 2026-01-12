@@ -28,9 +28,7 @@ exports.AzureADOAuthProvider = {
                 azureProfile.userPrincipalName ||
                 azureProfile.email ||
                 profile.emails?.[0]?.value,
-            displayName: azureProfile.displayName ||
-                azureProfile.name ||
-                profile.displayName,
+            displayName: azureProfile.displayName || azureProfile.name || profile.displayName,
             avatarUrl: azureProfile.photo || profile.photos?.[0]?.value,
             raw: profile,
         };
