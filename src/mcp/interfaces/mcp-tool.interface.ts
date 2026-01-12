@@ -14,14 +14,13 @@ export type SerializableValue =
   | SerializableValue[]
   | { [key: string]: SerializableValue };
 
-export type McpRequestSchema =
-  | typeof CallToolRequestSchema
-  | typeof ReadResourceRequestSchema
-  | typeof GetPromptRequestSchema;
+export const McpRequestSchema = z.union([
+  CallToolRequestSchema,
+  ReadResourceRequestSchema,
+  GetPromptRequestSchema,
+]);
 
-// Using 'any' to avoid strict type constraints from union of Zod schemas
-// The actual request will be one of the three types based on the method
-export type McpRequest = any;
+export type McpRequest = z.infer<typeof McpRequestSchema>;
 
 /**
  * Enhanced execution context that includes user information

@@ -7,7 +7,7 @@ export interface HttpRequest {
   headers: Record<string, string | string[] | undefined>;
   query: Record<string, any>;
   body?: any;
-  params?: Record<string, string>;
+  params?: Record<string, string | string[] | undefined>;
   /**
    * Get a header value by name (case-insensitive)
    */
