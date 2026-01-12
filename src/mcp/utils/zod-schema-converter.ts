@@ -19,13 +19,15 @@ export function zodToJsonSchema(schema: z.ZodType<any, any>): any {
   // Dynamically import to avoid hard dependency issues
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { zodToJsonSchema: legacyZodToJsonSchema } = require('zod-to-json-schema');
+    const {
+      zodToJsonSchema: legacyZodToJsonSchema,
+    } = require('zod-to-json-schema');
     return legacyZodToJsonSchema(schema);
   } catch (error) {
     throw new Error(
       'Failed to convert Zod schema to JSON Schema. ' +
-      'Ensure either Zod v4+ with native toJSONSchema() is installed, ' +
-      'or zod-to-json-schema is available for Zod v3 compatibility.',
+        'Ensure either Zod v4+ with native toJSONSchema() is installed, ' +
+        'or zod-to-json-schema is available for Zod v3 compatibility.',
     );
   }
 }
