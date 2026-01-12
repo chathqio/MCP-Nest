@@ -11,6 +11,7 @@ import {
   createStreamableClient,
   createSseClientWithElicitation,
   createStreamableClientWithElicitation,
+  getTextFromContentBlock,
 } from './utils';
 import { REQUEST } from '@nestjs/core';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -517,7 +518,9 @@ describe('E2E: MCP ToolServer', () => {
         try {
           const tools = await client.listTools();
           expect(tools.tools.length).toBeGreaterThan(0);
-          const metaTool = tools.tools.find((t) => t.name === 'hello-world-with-meta');
+          const metaTool = tools.tools.find(
+            (t) => t.name === 'hello-world-with-meta',
+          );
           expect(metaTool).toBeDefined();
           expect(metaTool!._meta).toBeDefined();
           expect(metaTool!._meta?.title).toBe('Say Hello');
@@ -549,7 +552,7 @@ describe('E2E: MCP ToolServer', () => {
               expect(progressCount).toBe(5);
             }
             expect(result.content[0].type).toBe('text');
-            expect(result.content[0].text).toContain(
+            expect(getTextFromContentBlock(result.content[0])).toContain(
               'Hello, Repository User Name userRepo123!',
             );
           } finally {
@@ -571,7 +574,9 @@ describe('E2E: MCP ToolServer', () => {
           });
 
           expect(result.content[0].type).toBe('text');
-          expect(result.content[0].text).toContain(requestScopedHeaderValue);
+          expect(getTextFromContentBlock(result.content[0])).toContain(
+            requestScopedHeaderValue,
+          );
         } finally {
           await client.close();
         }
@@ -587,7 +592,9 @@ describe('E2E: MCP ToolServer', () => {
           });
         } catch (error) {
           expect(error).toBeDefined();
-          expect(error.message).toContain('Expected string, received number');
+          expect(error.message).toContain(
+            'Invalid input: expected string, received number',
+          );
         }
 
         await client.close();
@@ -691,8 +698,9 @@ describe('E2E: MCP ToolServer', () => {
           expect(result).toHaveProperty('content');
           expect(Array.isArray(result.content)).toBe(true);
           expect(result.content[0].type).toBe('text');
-          expect(result.content[0].text).toContain('greeting');
-          expect(result.content[0].text).toContain('Hello, TestUser!');
+          const text = getTextFromContentBlock(result.content[0]);
+          expect(text).toContain('greeting');
+          expect(text).toContain('Hello, TestUser!');
         } finally {
           await client.close();
         }
@@ -712,8 +720,9 @@ describe('E2E: MCP ToolServer', () => {
           expect(result).toHaveProperty('content');
           expect(Array.isArray(result.content)).toBe(true);
           expect(result.content[0].type).toBe('text');
-          expect(result.content[0].text).toContain('greeting');
-          expect(result.content[0].text).toContain('Hello, TestUser!');
+          const text = getTextFromContentBlock(result.content[0]);
+          expect(text).toContain('greeting');
+          expect(text).toContain('Hello, TestUser!');
         } finally {
           await client.close();
         }
@@ -762,7 +771,7 @@ describe('E2E: MCP ToolServer', () => {
 
           expect(result.content).toBeDefined();
           expect(result.content[0].type).toBe('text');
-          expect(result.content[0].text).toContain(
+          expect(getTextFromContentBlock(result.content[0])).toContain(
             'Hello, TestUser TestSurname!',
           );
         } finally {
@@ -802,7 +811,9 @@ describe('E2E: MCP ToolServer', () => {
           expect(result.content).toBeDefined();
           expect(result.content[0].type).toBe('text');
           // Should use default surname when elicitation is declined
-          expect(result.content[0].text).toContain('Hello, TestUser!');
+          expect(getTextFromContentBlock(result.content[0])).toContain(
+            'Hello, TestUser!',
+          );
         } finally {
           await client.close();
         }
@@ -826,7 +837,9 @@ describe('E2E: MCP ToolServer', () => {
           expect(result.content).toBeDefined();
           expect(result.content[0].type).toBe('text');
           // Should use default surname when elicitation is cancelled
-          expect(result.content[0].text).toContain('Hello, TestUser!');
+          expect(getTextFromContentBlock(result.content[0])).toContain(
+            'Hello, TestUser!',
+          );
         } finally {
           await client.close();
         }

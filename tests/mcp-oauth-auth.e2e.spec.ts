@@ -18,7 +18,7 @@ import {
   ClientRegistrationDto,
 } from '../src/authz/stores/oauth-store.interface';
 import { OAuthSession } from '../src/authz/providers/oauth-provider.interface';
-import { createSseClient } from './utils';
+import { createSseClient, getTextFromContentBlock } from './utils';
 
 // Mock OAuth Provider for testing
 const MockOAuthProvider: OAuthProviderConfig = {
@@ -499,7 +499,7 @@ describe('E2E: McpAuthModule OAuth Flow', () => {
         arguments: { message: 'Hello' },
       });
 
-      expect(result.content[0].text).toContain(
+      expect(getTextFromContentBlock(result.content[0])).toContain(
         'Hello from authenticated user: testuser',
       );
 

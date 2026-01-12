@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Injectable } from '@nestjs/common';
 import { McpModule } from '../src/mcp/mcp.module';
-import { createSseClient } from './utils';
+import { createSseClient, getTextFromResourceContents } from './utils';
 import { Resource, ResourceTemplate } from '../src';
 
 @Injectable()
@@ -193,7 +193,7 @@ describe('E2E: MCP Resource Server', () => {
 
     expect(result.contents[0].uri).toBe('mcp://hello-world-world');
     expect(result.contents[0].mimeType).toBe('text/plain');
-    expect(result.contents[0].text).toBe('Hello World');
+    expect(getTextFromResourceContents(result.contents[0])).toBe('Hello World');
 
     await client.close();
   });
@@ -209,7 +209,9 @@ describe('E2E: MCP Resource Server', () => {
       'mcp://hello-world-dynamic/Raphael_John',
     );
     expect(result.contents[0].mimeType).toBe('text/plain');
-    expect(result.contents[0].text).toBe('Hello Raphael_John');
+    expect(getTextFromResourceContents(result.contents[0])).toBe(
+      'Hello Raphael_John',
+    );
 
     await client.close();
   });
@@ -225,7 +227,9 @@ describe('E2E: MCP Resource Server', () => {
       'mcp://hello-world-dynamic-multiple-paths/123/Raphael_John',
     );
     expect(result.contents[0].mimeType).toBe('text/plain');
-    expect(result.contents[0].text).toBe('Hello Raphael_John from 123');
+    expect(getTextFromResourceContents(result.contents[0])).toBe(
+      'Hello Raphael_John from 123',
+    );
 
     await client.close();
   });

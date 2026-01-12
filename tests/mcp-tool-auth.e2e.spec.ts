@@ -5,7 +5,7 @@ import { Context, Tool } from '../src';
 import { McpModule } from '../src/mcp/mcp.module';
 import { Progress } from '@modelcontextprotocol/sdk/types.js';
 import { CanActivate, ExecutionContext } from '@nestjs/common';
-import { createSseClient } from './utils';
+import { createSseClient, getTextFromContentBlock } from './utils';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 
 // Mock authentication guard
@@ -109,21 +109,9 @@ describe('E2E: MCP Server Tool with Authentication', () => {
           // Specify the MockAuthGuard to protect the messages endpoint
           guards: [MockAuthGuard],
           capabilities: {
+            tools: {},
             resources: {},
-            resourceTemplates: {},
             prompts: {},
-            tools: {
-              'auth-hello-world': {
-                description:
-                  'A sample tool that accesses the authenticated user',
-                input: {
-                  name: {
-                    type: 'string',
-                    default: 'World',
-                  },
-                },
-              },
-            },
           },
         }),
       ],
@@ -188,11 +176,10 @@ describe('E2E: MCP Server Tool with Authentication', () => {
 
     // Verify that authentication context was available to the tool
     expect(result.content[0].type).toBe('text');
-    expect(result.content[0].text).toContain('Auth Test Org');
-    expect(result.content[0].text).toContain('Test User');
-    expect(result.content[0].text).toContain(
-      'Repository user is Repository User',
-    );
+    const text = getTextFromContentBlock(result.content[0]);
+    expect(text).toContain('Auth Test Org');
+    expect(text).toContain('Test User');
+    expect(text).toContain('Repository user is Repository User');
 
     await client.close();
   });

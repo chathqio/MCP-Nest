@@ -3,7 +3,7 @@ import { INestApplication, Injectable, Scope } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { z } from 'zod';
 import { Context, McpModule, McpTransportType, Tool } from '../src';
-import { createStreamableClient } from './utils';
+import { createStreamableClient, getTextFromContentBlock } from './utils';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { randomUUID } from 'crypto';
 import {
@@ -228,7 +228,7 @@ describe('E2E: Fastify HTTP Adapter Support', () => {
 
       const result = await client.request(greetRequest, CallToolResultSchema);
       expect(result.content).toBeDefined();
-      expect(result.content[0].text).toContain(
+      expect(getTextFromContentBlock(result.content[0])).toContain(
         'Hello from fastify, Fastify User Express Test!',
       );
     });
@@ -244,7 +244,9 @@ describe('E2E: Fastify HTTP Adapter Support', () => {
 
       const result = await client.request(detectRequest, CallToolResultSchema);
       expect(result.content).toBeDefined();
-      expect(result.content[0].text).toContain('adapter working correctly');
+      expect(getTextFromContentBlock(result.content[0])).toContain(
+        'adapter working correctly',
+      );
     });
   });
 
@@ -304,7 +306,7 @@ describe('E2E: Fastify HTTP Adapter Support', () => {
       });
 
       expect(result.content).toBeDefined();
-      expect(result.content[0].text).toContain(
+      expect(getTextFromContentBlock(result.content[0])).toContain(
         'Hello from fastify, Fastify User Fastify Test!',
       );
       expect(progressReports).toBeGreaterThan(0); // Verify progress reporting works
@@ -321,7 +323,9 @@ describe('E2E: Fastify HTTP Adapter Support', () => {
 
       const result = await client.request(detectRequest, CallToolResultSchema);
       expect(result.content).toBeDefined();
-      expect(result.content[0].text).toContain('adapter working correctly');
+      expect(getTextFromContentBlock(result.content[0])).toContain(
+        'adapter working correctly',
+      );
     });
 
     it('should handle request scoping correctly', async () => {
@@ -352,12 +356,16 @@ describe('E2E: Fastify HTTP Adapter Support', () => {
         ),
       ]);
 
-      expect(result1.content[0].text).toContain(`testId=${testId1}`);
-      expect(result2.content[0].text).toContain(`testId=${testId2}`);
+      expect(getTextFromContentBlock(result1.content[0])).toContain(
+        `testId=${testId1}`,
+      );
+      expect(getTextFromContentBlock(result2.content[0])).toContain(
+        `testId=${testId2}`,
+      );
 
       // Extract unique IDs to verify they're different (proper request scoping)
-      const text1 = result1.content[0].text as string;
-      const text2 = result2.content[0].text as string;
+      const text1 = getTextFromContentBlock(result1.content[0]);
+      const text2 = getTextFromContentBlock(result2.content[0]);
       const uniqueId1 = text1.match(/uniqueId=([^,\s]+)/)?.[1];
       const uniqueId2 = text2.match(/uniqueId=([^,\s]+)/)?.[1];
 
@@ -426,8 +434,12 @@ describe('E2E: Fastify HTTP Adapter Support', () => {
         expect(expressResult.content.length).toBe(fastifyResult.content.length);
 
         // Both should contain the expected content
-        expect(expressResult.content[0].text).toContain('Compatibility Test');
-        expect(fastifyResult.content[0].text).toContain('Compatibility Test');
+        expect(getTextFromContentBlock(expressResult.content[0])).toContain(
+          'Compatibility Test',
+        );
+        expect(getTextFromContentBlock(fastifyResult.content[0])).toContain(
+          'Compatibility Test',
+        );
       } finally {
         await expressClient.close();
         await fastifyClient.close();

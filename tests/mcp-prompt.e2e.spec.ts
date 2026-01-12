@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Injectable } from '@nestjs/common';
 import { McpModule } from '../src/mcp/mcp.module';
-import { createSseClient } from './utils';
+import { createSseClient, getTextFromContentBlock } from './utils';
 import { Prompt } from '../src/mcp/decorators/prompt.decorator';
 import { z } from 'zod';
 
@@ -86,7 +86,9 @@ describe('E2E: MCP Prompt Server', () => {
     });
 
     expect(result.description).toBe('A simple greeting prompt');
-    expect(result.messages[0].content.text).toBe('Hello Raphael_John');
+    expect(getTextFromContentBlock(result.messages[0].content)).toBe(
+      'Hello Raphael_John',
+    );
 
     await client.close();
   });
@@ -101,7 +103,9 @@ describe('E2E: MCP Prompt Server', () => {
       });
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error.message).toContain('Expected string, received number');
+      expect(error.message).toContain(
+        'Invalid input: expected string, received number',
+      );
     }
     await client.close();
   });
