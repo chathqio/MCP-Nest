@@ -3,6 +3,30 @@ import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { ElicitRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import path from 'node:path';
+import process from 'node:process';
+import type {
+  ContentBlock,
+  BlobResourceContents,
+  TextResourceContents,
+} from '@modelcontextprotocol/sdk/types.js';
+
+export function getTextFromContentBlock(block: ContentBlock): string {
+  if (block.type !== 'text') {
+    throw new Error(`Expected text content block, got '${block.type}'`);
+  }
+  return block.text;
+}
+
+export function getTextFromResourceContents(
+  contents: TextResourceContents | BlobResourceContents,
+): string {
+  if ('text' in contents) {
+    return contents.text;
+  }
+
+  throw new Error('Expected text resource contents, got blob');
+}
 
 /**
  * Creates and connects a new MCP (Model Context Protocol) client for testing
@@ -31,12 +55,7 @@ export async function createSseClient(
   const client = new Client(
     { name: 'example-client', version: '1.0.0' },
     {
-      capabilities: {
-        tools: {},
-        resources: {},
-        resourceTemplates: {},
-        prompts: {},
-      },
+      capabilities: {},
     },
   );
   const sseUrl = new URL(`http://localhost:${port}/sse`);
@@ -73,12 +92,7 @@ export async function createStreamableClient(
   const client = new Client(
     { name: 'example-client', version: '1.0.0' },
     {
-      capabilities: {
-        tools: {},
-        resources: {},
-        resourceTemplates: {},
-        prompts: {},
-      },
+      capabilities: {},
     },
   );
   const url = new URL(`http://localhost:${port}${endpoint}`);
@@ -106,18 +120,29 @@ export async function createStdioClient(options: {
   const client = new Client(
     { name: 'example-stdio-client', version: '1.0.0' },
     {
-      capabilities: {
-        tools: {},
-        resources: {},
-        resourceTemplates: {},
-        prompts: {},
-      },
+      capabilities: {},
     },
   );
 
+  // NOTE: Avoid spawning the Windows `ts-node-dev.cmd` shim via PATH.
+  // Spawning `node <bin.js>` is much easier to terminate cleanly in Jest.
+  const tsNodeDevBin = path.join(
+    process.cwd(),
+    'node_modules',
+    'ts-node-dev',
+    'lib',
+    'bin.js',
+  );
+
   const transport = new StdioClientTransport({
-    command: 'ts-node-dev',
-    args: ['--respawn', options.serverScriptPath!],
+    command: process.execPath,
+    args: [
+      tsNodeDevBin,
+      '--transpile-only',
+      '--exit-child',
+      '--',
+      options.serverScriptPath,
+    ],
   });
 
   await client.connect(transport);
@@ -142,10 +167,6 @@ export async function createSseClientWithElicitation(
     { name: 'example-client-elicitation', version: '1.0.0' },
     {
       capabilities: {
-        tools: {},
-        resources: {},
-        resourceTemplates: {},
-        prompts: {},
         elicitation: {},
       },
     },
@@ -186,10 +207,6 @@ export async function createStreamableClientWithElicitation(
     { name: 'example-client-elicitation', version: '1.0.0' },
     {
       capabilities: {
-        tools: {},
-        resources: {},
-        resourceTemplates: {},
-        prompts: {},
         elicitation: {},
       },
     },
