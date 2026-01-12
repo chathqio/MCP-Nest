@@ -12,6 +12,9 @@ export interface JwtPayload {
   type: 'access' | 'refresh' | 'user';
   user_data?: any;
   user_profile_id?: string;
+  iss?: string;
+  aud?: string | string[];
+  jti?: string;
   iat?: number;
   exp?: number;
 }
@@ -26,11 +29,11 @@ export interface TokenPair {
 
 @Injectable()
 export class JwtTokenService {
-  private jwtSecret: string;
-  private issuer: string;
-  private accessTokenExpiresIn: string;
-  private refreshTokenExpiresIn: string;
-  private enableRefreshTokens: boolean;
+  private readonly jwtSecret: jwt.Secret;
+  private readonly issuer: string;
+  private readonly accessTokenExpiresInSeconds: number;
+  private readonly refreshTokenExpiresInSeconds: number;
+  private readonly enableRefreshTokens: boolean;
 
   constructor(@Inject('OAUTH_MODULE_OPTIONS') options: OAuthModuleOptions) {
     // Use JWT secret from environment variable
@@ -43,8 +46,12 @@ export class JwtTokenService {
     this.jwtSecret = jwtSecret;
     this.issuer =
       options.jwtIssuer || options.serverUrl || 'https://localhost:3000';
-    this.accessTokenExpiresIn = options.jwtAccessTokenExpiresIn;
-    this.refreshTokenExpiresIn = options.jwtRefreshTokenExpiresIn;
+    this.accessTokenExpiresInSeconds = this.parseDurationToSeconds(
+      options.jwtAccessTokenExpiresIn,
+    );
+    this.refreshTokenExpiresInSeconds = this.parseDurationToSeconds(
+      options.jwtRefreshTokenExpiresIn,
+    );
     this.enableRefreshTokens = options.enableRefreshTokens;
   }
 
@@ -61,7 +68,7 @@ export class JwtTokenService {
 
     const jti = randomBytes(16).toString('hex'); // JWT ID for tracking
 
-    const accessTokenPayload: any = {
+    const accessTokenPayload: JwtPayload = {
       sub: userId,
       azp: clientId, // Use azp instead of client_id
       iss: this.issuer,
@@ -79,18 +86,16 @@ export class JwtTokenService {
     // Always include scope to ensure parity with refresh token claims
     accessTokenPayload.scope = scope || '';
 
-    const accessToken = jwt.sign(
-      accessTokenPayload,
-      this.jwtSecret,
-      {
-        algorithm: 'HS256',
-        expiresIn: this.accessTokenExpiresIn,
-      } as any,
-    );
+    const algorithm: jwt.Algorithm = 'HS256';
+
+    const accessToken = jwt.sign(accessTokenPayload, this.jwtSecret, {
+      algorithm,
+      expiresIn: this.accessTokenExpiresInSeconds,
+    });
 
     let refreshToken: string | undefined = undefined;
     if (this.enableRefreshTokens) {
-      const refreshTokenPayload: any = {
+      const refreshTokenPayload: JwtPayload = {
         sub: userId,
         client_id: clientId,
         scope,
@@ -103,20 +108,16 @@ export class JwtTokenService {
       if (extras?.user_profile_id) {
         refreshTokenPayload.user_profile_id = extras.user_profile_id;
       }
-      refreshToken = jwt.sign(
-        refreshTokenPayload,
-        this.jwtSecret,
-        {
-          algorithm: 'HS256',
-          expiresIn: this.refreshTokenExpiresIn,
-        } as any,
-      );
+      refreshToken = jwt.sign(refreshTokenPayload, this.jwtSecret, {
+        algorithm,
+        expiresIn: this.refreshTokenExpiresInSeconds,
+      });
     }
 
     return {
       access_token: accessToken,
       token_type: 'bearer',
-      expires_in: this.parseDurationToSeconds(this.accessTokenExpiresIn),
+      expires_in: this.accessTokenExpiresInSeconds,
       ...(refreshToken ? { refresh_token: refreshToken } : {}),
     };
   }
@@ -158,7 +159,7 @@ export class JwtTokenService {
     const jti = randomBytes(16).toString('hex');
     const serverUrl = process.env.SERVER_URL || 'https://localhost:3000';
 
-    const payload = {
+    const payload: JwtPayload = {
       sub: userId,
       type: 'user',
       user_data: userData,
@@ -167,14 +168,12 @@ export class JwtTokenService {
       aud: 'mcp-client',
     };
 
-    return jwt.sign(
-      payload,
-      this.jwtSecret,
-      {
-        algorithm: 'HS256',
-        expiresIn: '24h',
-      } as any,
-    );
+    const algorithm: jwt.Algorithm = 'HS256';
+
+    return jwt.sign(payload, this.jwtSecret, {
+      algorithm,
+      expiresIn: 24 * 60 * 60,
+    });
   }
 
   private parseDurationToSeconds(duration: string): number {
